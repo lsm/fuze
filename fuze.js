@@ -1,12 +1,17 @@
+/**
+ * Inspired by http://github.com/willconant/flow-js, http://github.com/creationix/experiments/blob/master/step.js
+ *
+ */
+
 (function() {
-    var Firecracker = function() {};
+    var Fuze = function() {};
     var slice = Array.prototype.slice;
     var eos = function(err) {
         if (err) throw err;
         this.apply(this, slice.call(arguments, 1));
     }
 
-    Firecracker.prototype = {
+    Fuze.prototype = {
         defEos: function(fn) {
             eos = fn;
         },
@@ -18,8 +23,6 @@
                     return;
                 }
                 var fn = chains.shift();
-                //counter = 0;
-                //results = [];
                 fn.apply(next, arguments);
             }
             next.eos = function() {
@@ -31,6 +34,6 @@
         }    
     }
     if (module !== undefined && "exports" in module) {
-        module.exports = Firecracker;
+        module.exports = Fuze;
     }
 })();
