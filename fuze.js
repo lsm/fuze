@@ -34,7 +34,24 @@
             return function() {
                 next.apply(next, arguments);
             }
-        }    
+        },
+
+        bing: function() {
+            var fns = slice.call(arguments);
+            fns.forEach(function(fn, idx, fns) {
+                
+            });   
+        },
+
+        times: function(time, fn, callback) {
+            return function () {
+                var args = slice.call(arguments);
+                //if (callback) args.push(callback);
+                for (var i=0; i < time; i++ ) {
+                    fn.apply({idx: i, callback: callback}, args);
+                }                
+            }
+        }
     }
     if (module !== undefined && "exports" in module) {
         module.exports = Fuze;
