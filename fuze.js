@@ -81,7 +81,7 @@
             }
             next.eos = function(err) {
                 if (err)
-                    emit('err', step, err);
+                    emit(step, err);
                 else
                     next.apply(next, slice.call(arguments, 1));
             }
