@@ -1,5 +1,6 @@
 /**
  * Inspired by http://github.com/willconant/flow-js, http://github.com/creationix/experiments/blob/master/step.js
+ * @todo try/catch?
  *
  */
 
@@ -16,6 +17,10 @@
             clear && this.emitter.removeAllListeners('err');
             this.emitter.addListener('err', callback);
         },
+        
+        eos: function() {
+            // let me know what 'next' should be
+        },
 
         chain: function() {
             var chain = slice.call(arguments), fuze = this, step = 0, emitter = new EventEmitter;
@@ -30,7 +35,7 @@
                     func = link;
                     funcThis = next;
                     funcArgs = arguments;
-                } else if (link instanceof Array) {
+                } else if (Array.isArray(link)) {
                     var args = slice.call(arguments);
                     if (typeof link[0] === 'number') {
                         // the index of the argument, which should be used as funcThis
@@ -40,30 +45,32 @@
                         // call function by name
                         // assume 'this' of the function is the first argument if not set yet
                         funcThis = funcThis || args[0];
-                        func = funcThis[link[0]];
+                        func = funcThis && funcThis[link[0]];
                         if (typeof func !== 'function')
                             throw new Error('function not exists or it\'s not a function');
                     } else {
                         throw new Error('bad definition');
                     }
 
-                    if (func.length === link.length) {
+                    if (func.length !== 0 && func.length === link.length) {
                         // if you omit one argument, we assume it's the last one,
                         // where should be a callback function, which should be the next link in chain,
                         // use default error handling method provided by Fuze
                         link.push(next.eos);
                     }
-                    if (func.length !== link.length - 1) {
-                        // we should have all we need to feed the function
-                        throw new Error('Number of arguments not match your function definition, wrap your code if you want to use dynamic argument list');
+                    var last = link.pop();
+                    switch(last) {
+                        case fuze:
+                            link.push(next);
+                            break;
+                        case fuze.eos:
+                            link.push(next.eos);
+                            break;
+                        default:
+                            link.push(last);
+                            break;
                     }
-
-                    if (link[link.length-1] === fuze) {
-                        // if instance of current Fuze is the last argument,
-                        // then 'next' as the callback and you probably need to handle error by you self
-                        link.pop();
-                        link.push(next);
-                    }
+                    
                     // call it with the rest of link's elements as the function's arguments
                     funcArgs = link.slice(1);
                 }
